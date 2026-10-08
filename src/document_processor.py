@@ -91,14 +91,19 @@ def clean_document_text(text):
     """
     if not isinstance(text, str):
         raise TypeError("Document text must be a string.")
-    # STUDENT TODO 10.1 — Clean Extracted Text
-    # Difficulty: ★ Guided | Student scaffold.
-    # Goal: normalize whitespace, not language. Expected: readable natural text.
-    # Hint: normalize line endings, then horizontal spaces and blank lines.
-    # BEGIN STUDENT CORE 10.1
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 10.1: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 10.1
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    lines = []
+    last_blank = False
+    for line in normalized.split("\n"):
+        compact = re.sub(r"\s+", " ", line).strip()
+        if not compact:
+            if not last_blank and lines:
+                lines.append("")
+                last_blank = True
+            continue
+        lines.append(compact)
+        last_blank = False
+    return "\n".join(lines).strip()
 
 
 def _chunk_settings(chunk_size, overlap=0):
@@ -132,14 +137,12 @@ def split_text_into_chunks(text, chunk_size=DEFAULT_CHUNK_SIZE):
     """
     _chunk_settings(chunk_size)
     spans = _word_spans(text)
-    # STUDENT TODO 10.2 — Split Text Into Chunks
-    # Difficulty: ★★ Core | Student scaffold.
-    # Goal: cover all words in size-word steps. Expected: ordered word windows.
-    # Hint: starts are 0, size, 2*size; the starter helper records exact offsets.
-    # BEGIN STUDENT CORE 10.2
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 10.2: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 10.2
+    if not spans:
+        return []
+    chunks = []
+    for start in range(0, len(spans), chunk_size):
+        chunks.append(_word_window(text, spans, start, chunk_size))
+    return chunks
 
 
 def create_overlapping_chunks(text, chunk_size=DEFAULT_CHUNK_SIZE, overlap=DEFAULT_OVERLAP):
@@ -153,15 +156,17 @@ def create_overlapping_chunks(text, chunk_size=DEFAULT_CHUNK_SIZE, overlap=DEFAU
     if overlap == 0:
         return split_text_into_chunks(text, chunk_size)
     spans = _word_spans(text)
-    # STUDENT TODO 10.3 — Add Chunk Overlap
-    # Difficulty: ★★ Core | Student scaffold.
-    # Goal: retain shared boundary words. Formula: step = chunk_size - overlap.
-    # Expected: progressing windows including final partial text.
-    # Hint: stop after a window includes the last word; avoid redundant tails.
-    # BEGIN STUDENT CORE 10.3
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 10.3: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 10.3
+    if not spans:
+        return []
+    step = chunk_size - overlap
+    chunks = []
+    start = 0
+    while start < len(spans):
+        chunks.append(_word_window(text, spans, start, chunk_size))
+        if start + chunk_size >= len(spans):
+            break
+        start += step
+    return chunks
 
 
 def attach_chunk_metadata(chunks, document, *, page_number=None, start_index=0):
@@ -183,14 +188,19 @@ def attach_chunk_metadata(chunks, document, *, page_number=None, start_index=0):
         raise ValueError("Markdown does not have physical page numbers.")
     if document["source_type"] == "pdf" and (isinstance(page_number, bool) or not isinstance(page_number, int) or page_number < 1):
         raise ValueError("PDF chunks require a positive physical page number.")
-    # STUDENT TODO 10.4 — Attach Chunk Metadata
-    # Difficulty: ★★ Core | Student scaffold.
-    # Goal: keep source provenance. Expected: labeled chunks with stable IDs.
-    # Hint: combine document identity, running index, page and window boundaries.
-    # BEGIN STUDENT CORE 10.4
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 10.4: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 10.4
+
+    output = []
+    for offset, chunk in enumerate(chunks):
+        labeled = dict(chunk)
+        labeled["document_id"] = document["document_id"]
+        labeled["document_title"] = document["title"]
+        labeled["source_path"] = document["source_path"]
+        labeled["source_type"] = document["source_type"]
+        labeled["page_number"] = page_number
+        labeled["chunk_index"] = start_index + offset
+        labeled["chunk_id"] = f"{document['document_id']}::chunk_{start_index + offset:03d}"
+        output.append(labeled)
+    return output
 
 
 def process_document(document, chunk_size=DEFAULT_CHUNK_SIZE, overlap=DEFAULT_OVERLAP):
