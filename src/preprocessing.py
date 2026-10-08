@@ -41,17 +41,7 @@ def lowercase_text(text: str) -> str:
     Example: 'NLP is Useful!' becomes 'nlp is useful!'.
     """
     _validate_text(text)
-    # ============================================================
-    # STUDENT TODO 1.1 — Lowercase Normalization
-    # Difficulty: ★ Guided | Student scaffold.
-    # Goal: Make capitalization consistent without other cleaning.
-    # Expected: A string of the same text with lowercase letters.
-    # Hint: Strings provide a built-in case conversion method.
-    # ============================================================
-    # BEGIN STUDENT CORE 1.1
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 1.1: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 1.1
+    return text.lower()
 
 
 def remove_punctuation(text: str) -> str:
@@ -62,17 +52,7 @@ def remove_punctuation(text: str) -> str:
     decimal points also split: this simple policy is deliberately visible.
     """
     _validate_text(text)
-    # ============================================================
-    # STUDENT TODO 1.2 — Punctuation Handling
-    # Difficulty: ★ Guided | Student scaffold.
-    # Goal: Replace punctuation, keeping neighbouring words separate.
-    # Expected: A string; punctuation becomes spaces, not merged text.
-    # Hint: Use the provided _is_punctuation helper on each character.
-    # ============================================================
-    # BEGIN STUDENT CORE 1.2
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 1.2: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 1.2
+    return "".join(" " if _is_punctuation(ch) else ch for ch in text)
 
 
 def tokenize_words(text: str) -> list[str]:
@@ -83,17 +63,7 @@ def tokenize_words(text: str) -> list[str]:
     This function does not lowercase or filter the input.
     """
     _validate_text(text)
-    # ============================================================
-    # STUDENT TODO 1.3 — Word Tokenization
-    # Difficulty: ★ Guided | Student scaffold.
-    # Goal: Apply the provided library tokenizer, not its internals.
-    # Expected: An ordered list of tokens, retaining repetitions.
-    # Hint: wordpunct_tokenize accepts a text string.
-    # ============================================================
-    # BEGIN STUDENT CORE 1.3
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 1.3: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 1.3
+    return wordpunct_tokenize(text)
 
 
 def remove_stopwords(
@@ -113,17 +83,7 @@ def remove_stopwords(
     if isinstance(stopword_set, str) or any(not isinstance(w, str) for w in stopword_set):
         raise TypeError("Stopwords must be a collection of strings, not one string.")
     stopword_set = {word.lower() for word in stopword_set}
-    # ============================================================
-    # STUDENT TODO 1.4 — Stopword Removal
-    # Difficulty: ★ Guided | Student scaffold.
-    # Goal: Retain tokens absent from the supplied stopword set.
-    # Expected: A new ordered list; the input list is not modified.
-    # Hint: Filter by membership, comparing a lowercase token.
-    # ============================================================
-    # BEGIN STUDENT CORE 1.4
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 1.4: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 1.4
+    return [token for token in tokens if token.lower() not in stopword_set]
 
 
 def stem_words(tokens: Sequence[str]) -> list[str]:
@@ -134,17 +94,7 @@ def stem_words(tokens: Sequence[str]) -> list[str]:
     """
     _validate_tokens(tokens)
     stemmer = PorterStemmer()
-    # ============================================================
-    # STUDENT TODO 1.5 — Stemming
-    # Difficulty: ★ Guided | Student scaffold.
-    # Goal: Apply a standard stemmer to each token.
-    # Expected: A list of stems; keep order and repeated tokens.
-    # Hint: The provided stemmer has a stem method.
-    # ============================================================
-    # BEGIN STUDENT CORE 1.5
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 1.5: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 1.5
+    return [stemmer.stem(token) for token in tokens]
 
 
 def lemmatize_words(tokens: Sequence[str], pos: str = "n") -> list[str]:
@@ -162,18 +112,8 @@ def lemmatize_words(tokens: Sequence[str], pos: str = "n") -> list[str]:
         return []
     require_resource("wordnet")
     lemmatizer = WordNetLemmatizer()
-    # ============================================================
-    # STUDENT TODO 1.6 — Lemmatization
-    # Difficulty: ★ Guided | Student scaffold.
-    # Goal: Apply the provided lemmatizer using the supplied POS.
-    # Expected: A list of lemmas; some tokens may remain unchanged.
-    # Hint: lemmatize accepts a token and a pos argument.
-    # ============================================================
     try:
-        # BEGIN STUDENT CORE 1.6
-        # Implement only this educational core; surrounding setup stays provided.
-        raise NotImplementedError('STUDENT TODO 1.6: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-        # END STUDENT CORE 1.6
+        return [lemmatizer.lemmatize(token.lower(), pos=pos) for token in tokens]
     except LookupError as error:
         raise NLTKResourceError(
             "WordNet cannot be read. Repair or replace its .nltk_data corpus "
@@ -188,17 +128,7 @@ def build_vocabulary(tokens: Sequence[str]) -> list[str]:
     document or a token. Empty input returns an empty vocabulary.
     """
     _validate_tokens(tokens)
-    # ============================================================
-    # STUDENT TODO 1.7 — Vocabulary and Word Frequency
-    # Difficulty: ★★ Core | Student scaffold.
-    # Goal: Vocabulary is the unique token set of the chosen representation.
-    # Expected: A sorted list, with each token appearing exactly once.
-    # Hint: Deduplicate first, then choose deterministic ordering.
-    # ============================================================
-    # BEGIN STUDENT CORE 1.7 — vocabulary
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 1.7 — vocabulary: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 1.7 — vocabulary
+    return sorted(set(tokens))
 
 
 def calculate_word_frequencies(tokens: Sequence[str]) -> dict[str, int]:
@@ -208,18 +138,10 @@ def calculate_word_frequencies(tokens: Sequence[str]) -> dict[str, int]:
     The counts sum to the number of tokens. Empty input returns {}.
     """
     _validate_tokens(tokens)
-    # ============================================================
-    # STUDENT TODO PART 1.7 — Word Frequency (paired with vocabulary above)
-    # Difficulty: ★★ Core | Student scaffold.
-    # Goal: Count how often each token occurs, without removing repeats.
-    # Formula: frequency(t) = number of tokens equal to t.
-    # Expected: Token-to-count mapping; counts sum to len(tokens).
-    # Hint: Initialize unseen tokens, then increment their count.
-    # ============================================================
-    # BEGIN STUDENT CORE 1.7 — frequency
-    # Implement only this educational core; surrounding setup stays provided.
-    raise NotImplementedError('STUDENT TODO 1.7 — frequency: implement this exercise in the marked core; see docs/STUDENT_GUIDE.md.')
-    # END STUDENT CORE 1.7 — frequency
+    counts: dict[str, int] = {}
+    for token in tokens:
+        counts[token] = counts.get(token, 0) + 1
+    return {token: counts[token] for token in sorted(counts)}
 
 
 def tag_parts_of_speech(tokens: Sequence[str]) -> list[tuple[str, str]]:
